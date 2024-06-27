@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parking Management System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: lightgoldenrodyellow;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            max-width: 500px;
+            width: 100%;
+            padding: 20px;
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        label {
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+        input[type="text"] {
+            padding: 10px;
+            font-size: 16px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 80%;
+        }
+        .buttons {
+            display: flex;
+            gap: 10px;
+        }
+        button {
+            padding: 15px;
+            margin:10px;
+            width: 85px;
+            font-size: 16px;
+            color: white;
+            background-color: #28a745;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .exit {
+            background-color: red;
+        }
+        .exit:hover {
+            background-color: darkred;
+        }
+        .slot-info {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .slot-info p {
+            font-size: 18px;
+            color: #333;
+        }
+        .available-slots {
+            margin-top: 10px;
+            text-align: center;
+        }
+        .available-slots ul {
+            list-style: none;
+            padding: 0;
+        }
+        .available-slots li {
+            display: inline-block;
+            margin: 5px;
+            padding: 10px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+        }
+        .container1 {
+            display: flex;
+            justify-content: center;
+            align-items: normal;
+            width: 100%;
+            margin: 20px;       
+            flex-direction: column;    
+        }
+        .card {
+            flex: 1;
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 10px;
+            align-content: center;
+        }
+        h1, h2 {
+            color: #333;
+            text-align: center;
+        }
+        .slot-info {
+            text-align: left;
+            margin-top: 20px;
+        }
+        .slot-info p {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .map-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .parking-map {
+            max-width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .displayBlock{
+            display: block;
+        }
+        .displayNone{
+            display: none;
+        }      
+        .slot-info-2{
+            text-align: center;
+            font-size: 60px;
+        } 
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .available-slots strong, .available-slots h3 {
+            display: inline;
+            margin: 0;
+        }
+    </style>
+</head>
+<body onload="getAvailableSlots()">
+    <div id="container" class="container">
+        <h1>Parking Management System</h1>
+        <form id="slotForm">
+            <!-- <label for="rfid">RFID Number:</label> -->
+            <h2>RFID Number:</h2>
+            <input type="text" id="rfid" name="rfid" required>
+            <div class="buttons">
+                <button type="button" id="entryButton">Entry</button>
+                <button type="button" id="exitButton" class="exit">Exit</button>
+            </div>
+        </form>
+        <div class="slot-info">
+            <div class="available-slots"  style="font-size: 30px;font-weight: bolder;">
+                <h3>Available Slots:</h3>
+                <h3 id="availableSlots"><strong></strong></h3>
+            </div>
+        </div>
+    </div>
+    <div class="header displayNone">
+        <h1 style="text-align: center;"> Assigned Parking Details</h1>
+    </div>   
+    <div id="container1" class="container1 displayNone">   
+        <div  class="slotHead" style="background-color: #28a745;">
+            <h1> Assigned Spot </h1>
+        </div>
+    <div class="slotDetails" style="display: flex;max-width: 800px;
+    align-self: center;">
+            <div class="card" style="background-color: salmon; font-size: 20px;">
+                <div class="slot-info-2">
+                    <div>
+                        <h4><strong>Assigned Slot</strong></h4>
+                    </div> 
+                    <div style="font-size: 150px;font-weight: bolder;">
+                        <span id="assignedSlot"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="card" style="background-color: lightblue;">
+                <h1>Parking Slot Map</h1>
+                <div class="map-container">
+                    <img src="sampleLayout2.png" alt="Parking Map" class="parking-map">
+                </div>
+            </div>
+    </div>
+    </div>
+
+    <script>
+
+        async function fetchData() {            
+            const response = await fetch(`http://localhost:5099/Parking?inputRFID=0`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();                                              
+                const availableSlotsList = document.getElementById('availableSlots');
+                availableSlotsList.innerHTML = data.availableSlots;
+                // document.getElementById('container1').classList.remove('displayNone');
+                // document.getElementById('container').classList.add('displayNone');
+            } else {
+                alert('Failed to display available-slots');
+            }
+        }
+
+        window.onload = fetchData;
+
+
+        document.getElementById('entryButton').addEventListener('click', async function(event) {
+            event.preventDefault();                    
+            const rfid = document.getElementById('rfid').value;
+            const response = await fetch(`http://localhost:5099/Parking?inputRFID=${rfid}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                document.getElementById('assignedSlot').innerText = data.parkingSlot;                                    
+                const availableSlotsList = document.getElementById('availableSlots');
+                availableSlotsList.innerHTML = data.availableSlots;
+                document.getElementById('container1').classList.remove('displayNone');
+                document.getElementById('container').classList.add('displayNone');
+            } else {
+                alert('Failed to assign slot');
+            }
+        });
+
+        document.getElementById('exitButton').addEventListener('click', async function(event) {
+            event.preventDefault();                    
+            const rfid = document.getElementById('rfid').value;
+            const response = await fetch('http://localhost:5099/Parking', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ inputRFID: rfid })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                alert(data.errorMessage);
+                window.location.reload();
+            } else {
+                alert('Failed to exit parking');
+            }
+        });
+    </script>
+</body>
+</html>
