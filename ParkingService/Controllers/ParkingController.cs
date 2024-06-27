@@ -56,7 +56,7 @@ namespace ParkingService.Controllers
                     availableSlot--;
                     pr.AvailableSlots = availableSlot;
 
-                    string mobNum = "+917996823996";
+                    string mobNum = "+91" + response.MobileNum;
                     string msg = "Your vehicle is parked under Slot number - " + response.Slot + "\n Please click on the link to view your parked vehicle - \"https://parkinglayout.blob.core.windows.net/parkinglayout/sampleLayout2.png\"";
                     smsService.SendSms(mobNum, msg);
                 }
